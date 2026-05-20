@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>💜 Our Little World 💜</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple-deep: #3d1a6e;
+    --purple-mid: #7b3fa0;
+    --purple-soft: #b07fd4;
+    --purple-pale: #e4c9f5;
+    --purple-blush: #f5eafd;
+    --pink-accent: #f2a7d8;
+    --cream: #fdf8ff;
+    --gold: #e8c87a;
+    --text-dark: #2d1050;
+    --text-soft: #7a5a9a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Quicksand', sans-serif;
+    background: var(--purple-blush);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== BUBBLES BG ===== */
+  .bubbles {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .bubble {
+    position: absolute; border-radius: 50%;
+    animation: floatUp linear infinite;
+    opacity: 0.18;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
+    10% { opacity: 0.2; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(-10vh) scale(1.1); opacity: 0; }
+  }
+
+  /* ===== LOCK SCREEN ===== */
+  #lockScreen {
+    position: fixed; inset: 0;
+    background: linear-gradient(145deg, #2a0d55 0%, #5a1e8c 40%, #8c3fb5 70%, #c06fd4 100%);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .lock-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 28px;
+    padding: 40px 32px;
+    max-width: 380px; width: 100%;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    animation: cardIn 0.8s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(40px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .lock-icon {
+    font-size: 52px; margin-bottom: 8px;
+    animation: wiggle 3s ease-in-out infinite;
+  }
+  @keyframes wiggle {
+    0%,100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+
+  .lock-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; color: #fff;
+    margin-bottom: 6px; font-style: italic;
+  }
+  .lock-sub {
+    font-size: 13px; color: rgba(255,255,255,0.65);
+    margin-bottom: 28px; font-weight: 300;
+  }
+
+  .qr-box {
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px; padding: 20px;
+    margin-bottom: 24px;
+    border: 1px dashed rgba(255,255,255,0.25);
+  }
+  .qr-scan-area {
+    width: 180px; height: 180px;
+    margin: 0 auto 14px;
+    border-radius: 16px; overflow: hidden;
+    background: rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  .qr-corners::before, .qr-corners::after {
+    content: ''; position: absolute;
+    width: 28px; height: 28px;
+    border: 3px solid var(--pink-accent);
+  }
+  .qr-corners::before { top: 8px; left: 8px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+  .qr-corners::after { bottom: 8px; right: 8px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+
+  .scan-line {
+    position: absolute; width: 85%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--pink-accent), transparent);
+    animation: scanAnim 2.5s ease-in-out infinite;
+    border-radius: 2px;
+  }
+  @keyframes scanAnim {
+    0%,100% { top: 15%; opacity: 0.4; }
+    50% { top: 80%; opacity: 1; }
+  }
+
+  .qr-icon-big { font-size: 64px; position: relative; z-index: 2; }
+  .qr-hint { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+  .divider-or {
+    display: flex; align-items: center; gap: 12px;
+    color: rgba(255,255,255,0.4); font-size: 12px;
+    margin-bottom: 16px;
+  }
+  .divider-or::before, .divider-or::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  .pin-input-group {
+    display: flex; gap: 10px; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .pin-digit {
+    width: 52px; height: 58px;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    font-size: 24px; text-align: center;
+    color: #fff; outline: none;
+    font-family: 'Quicksand', sans-serif; font-weight: 600;
+    transition: all 0.2s;
+    caret-color: var(--pink-accent);
+  }
+  .pin-digit:focus {
+    border-color: var(--pink-accent);
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 0 3px rgba(242,167,216,0.2);
+  }
+
+  .unlock-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #c06fd4, #8c3fb5);
+    color: #fff; border: none; border-radius: 14px;
+    font-size: 15px; font-weight: 600;
+    font-family: 'Quicksand', sans-serif;
+    cursor: pointer; letter-spacing: 0.5px;
+    box-shadow: 0 8px 24px rgba(140,63,181,0.45);
+    transition: all 0.2s;
+  }
+  .unlock-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(140,63,181,0.55); }
+  .unlock-btn:active { transform: scale(0.97); }
+
+  .error-msg {
+    color: #ffb3b3; font-size: 13px;
+    margin-top: 12px; min-height: 20px;
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  /* ===== MAIN GALLERY ===== */
+  #mainContent {
+    display: none; position: relative; z-index: 1;
+    min-height: 100vh;
+    animation: fadeInMain 1s ease both;
+  }
+  @keyframes fadeInMain {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Header */
+  .gallery-header {
+    text-align: center;
+    padding: 50px 20px 30px;
+    position: relative;
+  }
+  .header-deco {
+    font-size: 28px; letter-spacing: 8px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  .gallery-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 8vw, 48px);
+    color: var(--purple-deep);
+    font-style: italic;
+    line-height: 1.2; margin: 8px 0 6px;
+    text-shadow: 0 2px 20px rgba(123,63,160,0.15);
+  }
+  .gallery-subtitle {
+    color: var(--text-soft);
+    font-size: 14px; font-weight: 400;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .hearts-row {
+    margin-top: 14px; font-size: 16px;
+    animation: heartPop 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes heartPop {
+    from { letter-spacing: 6px; }
+    to { letter-spacing: 12px; }
+  }
+
+  /* ===== CATEGORY TABS ===== */
+  .tabs-wrap {
+    display: flex; gap: 10px; padding: 0 20px 20px;
+    overflow-x: auto; justify-content: center;
+    scrollbar-width: none;
+  }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 9px 20px;
+    border-radius: 50px; border: 1.5px solid var(--purple-soft);
+    background: transparent; color: var(--purple-mid);
+    font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.25s; white-space: nowrap;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--purple-mid); color: #fff;
+    border-color: var(--purple-mid);
+    box-shadow: 0 4px 16px rgba(123,63,160,0.3);
+  }
+
+  /* ===== MASONRY GRID ===== */
+  .gallery-grid {
+    columns: 2; column-gap: 12px;
+    padding: 0 14px 80px;
+    max-width: 500px; margin: 0 auto;
+  }
+  @media (min-width: 480px) { .gallery-grid { columns: 3; } }
+
+  .photo-card {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    border-radius: 18px; overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(123,63,160,0.12);
+    cursor: pointer; position: relative;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    animation: cardAppear 0.6s ease both;
+  }
+  @keyframes cardAppear {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .photo-card:hover, .photo-card:active {
+    transform: scale(1.03) translateY(-4px);
+    box-shadow: 0 12px 36px rgba(123,63,160,0.25);
+    z-index: 10;
+  }
+
+  .photo-placeholder {
+    width: 100%; aspect-ratio: auto;
+    display: block; object-fit: cover;
+    min-height: 120px;
+  }
+
+  /* Placeholder while no image */
+  .photo-empty {
+    width: 100%; background: linear-gradient(135deg, var(--purple-pale), var(--pink-accent));
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px 10px; gap: 8px;
+    cursor: pointer;
+  }
+  .photo-empty-icon { font-size: 28px; }
+  .photo-empty-label { font-size: 11px; color: var(--purple-deep); font-weight: 500; text-align: center; }
+
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(61,26,110,0.7) 0%, transparent 50%);
+    opacity: 0; transition: opacity 0.3s;
+    border-radius: 18px;
+    display: flex; align-items: flex-end;
+    padding: 12px;
+  }
+  .photo-card:hover .card-overlay { opacity: 1; }
+  .card-caption {
+    color: #fff; font-size: 11px;
+    font-weight: 500; letter-spacing: 0.3px;
+  }
+
+  .heart-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%; width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+  .heart-badge:active { transform: scale(1.3); }
+
+  /* ===== ADD PHOTO BUTTON ===== */
+  .add-photo-card {
+    border: 2.5px dashed var(--purple-soft);
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+  .add-photo-card:hover {
+    border-color: var(--purple-mid);
+    background: rgba(176,127,212,0.08);
+  }
+
+  /* ===== FLOATING HEART ===== */
+  .floating-hearts { position: fixed; bottom: 80px; right: 18px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+  .float-heart {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #c06fd4, #f2a7d8);
+    border-radius: 50%; border: none;
+    font-size: 20px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(192,111,212,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .float-heart:active { transform: scale(1.2); }
+
+  /* ===== LIGHTBOX ===== */
+  #lightbox {
+    position: fixed; inset: 0;
+    background: rgba(20,5,40,0.95);
+    z-index: 999; display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    flex-direction: column;
+  }
+  #lightbox.open { display: flex; animation: lbIn 0.3s ease; }
+  @keyframes lbIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  #lightboxImg {
+    max-width: 100%; max-height: 72vh;
+    border-radius: 20px; object-fit: contain;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  #lightboxCaption {
+    color: rgba(255,255,255,0.8); font-size: 14px;
+    margin-top: 14px; text-align: center;
+    font-style: italic;
+  }
+  .lb-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.12); border: none;
+    color: #fff; font-size: 20px; width: 40px; height: 40px;
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lb-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.1); border: none;
+    color: #fff; font-size: 22px;
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .lb-nav:hover { background: rgba(255,255,255,0.2); }
+  #lbPrev { left: 12px; }
+  #lbNext { right: 12px; }
+
+  /* ===== MEMORY BANNER ===== */
+  .memory-banner {
+    margin: 0 14px 20px;
+    background: linear-gradient(135deg, var(--purple-deep), var(--purple-mid));
+    border-radius: 20px; padding: 20px 22px;
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .memory-banner::before {
+    content: '💜'; position: absolute;
+    right: -10px; bottom: -10px;
+    font-size: 80px; opacity: 0.12;
+  }
+  .memory-date { font-size: 11px; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase; }
+  .memory-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-style: italic;
+    margin-top: 4px; line-height: 1.4;
+  }
+  .memory-count { margin-top: 12px; font-size: 12px; opacity: 0.8; }
+
+  /* ===== ADD/EDIT MODAL ===== */
+  #editModal {
+    position: fixed; inset: 0;
+    background: rgba(20,5,40,0.85);
+    z-index: 998; display: none;
+    align-items: flex-end; justify-content: center;
+  }
+  #editModal.open { display: flex; }
+  .edit-sheet {
+    background: var(--cream);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 22px 40px;
+    width: 100%; max-width: 480px;
+    animation: sheetIn 0.35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes sheetIn {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .sheet-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; color: var(--purple-deep);
+    margin-bottom: 18px; text-align: center;
+  }
+  .sheet-row { margin-bottom: 14px; }
+  .sheet-label { font-size: 12px; color: var(--text-soft); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .sheet-input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--purple-pale);
+    border-radius: 12px; font-family: 'Quicksand', sans-serif;
+    font-size: 14px; color: var(--text-dark); outline: none;
+    background: #fff; transition: border-color 0.2s;
+  }
+  .sheet-input:focus { border-color: var(--purple-soft); }
+  .sheet-file-btn {
+    width: 100%; padding: 30px;
+    border: 2px dashed var(--purple-soft);
+    border-radius: 16px; background: var(--purple-blush);
+    cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .sheet-file-btn:hover { border-color: var(--purple-mid); background: var(--purple-pale); }
+  .sheet-file-icon { font-size: 32px; margin-bottom: 6px; }
+  .sheet-file-text { font-size: 13px; color: var(--text-soft); }
+  .sheet-file-preview {
+    width: 100%; height: 160px; object-fit: cover;
+    border-radius: 12px; display: none;
+  }
+  .sheet-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .btn-save {
+    flex: 1; padding: 13px;
+    background: linear-gradient(135deg, var(--purple-mid), var(--purple-deep));
+    color: #fff; border: none; border-radius: 14px;
+    font-family: 'Quicksand', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 6px 20px rgba(123,63,160,0.35);
+    transition: all 0.2s;
+  }
+  .btn-save:hover { transform: translateY(-1px); }
+  .btn-cancel {
+    padding: 13px 20px;
+    background: var(--purple-pale); color: var(--purple-mid);
+    border: none; border-radius: 14px;
+    font-family: 'Quicksand', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--purple-deep); color: #fff;
+    padding: 10px 22px; border-radius: 50px;
+    font-size: 13px; z-index: 9999;
+    opacity: 0; transition: all 0.3s; white-space: nowrap;
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== HIDE SCROLLBAR WHEN LOCK ===== */
+  body.locked { overflow: hidden; }
+
+  /* ===== STAGGER animations ===== */
+  .photo-card:nth-child(1) { animation-delay: 0.05s; }
+  .photo-card:nth-child(2) { animation-delay: 0.1s; }
+  .photo-card:nth-child(3) { animation-delay: 0.15s; }
+  .photo-card:nth-child(4) { animation-delay: 0.2s; }
+  .photo-card:nth-child(5) { animation-delay: 0.25s; }
+  .photo-card:nth-child(6) { animation-delay: 0.3s; }
+</style>
+</head>
+<body class="locked">
+
+<!-- === BACKGROUND BUBBLES === -->
+<div class="bubbles" id="bubbles"></div>
+
+<!-- ===================== LOCK SCREEN ===================== -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-icon">🔮</div>
+    <h1 class="lock-title">Our Little World</h1>
+    <p class="lock-sub">Area privat khusus kita berdua 💜</p>
+
+    <div class="qr-box">
+      <div class="qr-scan-area">
+        <div class="qr-corners"></div>
+        <div class="scan-line"></div>
+        <span class="qr-icon-big">📷</span>
+      </div>
+      <p class="qr-hint">Scan QR Code untuk masuk</p>
+    </div>
+
+    <div class="divider-or">atau masukkan PIN</div>
+
+    <div class="pin-input-group">
+      <input type="password" maxlength="1" class="pin-digit" id="p1" inputmode="numeric">
+      <input type="password" maxlength="1" class="pin-digit" id="p2" inputmode="numeric">
+      <input type="password" maxlength="1" class="pin-digit" id="p3" inputmode="numeric">
+      <input type="password" maxlength="1" class="pin-digit" id="p4" inputmode="numeric">
+    </div>
+
+    <button class="unlock-btn" onclick="checkPin()">💜 Buka Kenangan</button>
+    <p class="error-msg" id="errMsg"></p>
+  </div>
+</div>
+
+<!-- ===================== MAIN GALLERY ===================== -->
+<div id="mainContent">
+
+  <!-- Header -->
+  <div class="gallery-header">
+    <div class="header-deco">✦ ✦ ✦</div>
+    <h1 class="gallery-title">Our Little World</h1>
+    <p class="gallery-subtitle">Foto Kenangan Kita</p>
+    <div class="hearts-row">💜 🌸 💜 🌸 💜</div>
+  </div>
+
+  <!-- Memory Banner -->
+  <div class="memory-banner" id="memoryBanner">
+    <div class="memory-date" id="bannerDate">Loading...</div>
+    <div class="memory-text" id="bannerQuote">"Setiap foto menyimpan sejuta rasa..."</div>
+    <div class="memory-count" id="photoCount">📸 0 kenangan tersimpan</div>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="tabs-wrap">
+    <button class="tab-btn active" onclick="filterPhotos('all', this)">💜 Semua</button>
+    <button class="tab-btn" onclick="filterPhotos('date', this)">🌸 Kencan</button>
+    <button class="tab-btn" onclick="filterPhotos('travel', this)">✈️ Jalan-jalan</button>
+    <button class="tab-btn" onclick="filterPhotos('selfie', this)">🤳 Selfie</button>
+    <button class="tab-btn" onclick="filterPhotos('moment', this)">⭐ Momen</button>
+  </div>
+
+  <!-- Gallery Grid -->
+  <div class="gallery-grid" id="galleryGrid">
+    <!-- Cards injected by JS -->
+  </div>
+
+  <!-- Floating Actions -->
+  <div class="floating-hearts">
+    <button class="float-heart" onclick="openEdit(null)" title="Tambah Foto">＋</button>
+  </div>
+</div>
+
+<!-- ===================== LIGHTBOX ===================== -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav" id="lbPrev" onclick="lbNav(-1)">‹</button>
+  <img id="lightboxImg" src="" alt="">
+  <p id="lightboxCaption"></p>
+  <button class="lb-nav" id="lbNext" onclick="lbNav(1)">›</button>
+</div>
+
+<!-- ===================== EDIT MODAL ===================== -->
+<div id="editModal">
+  <div class="edit-sheet">
+    <div class="sheet-title" id="sheetTitle">✨ Tambah Foto Baru</div>
+    <div class="sheet-row">
+      <label class="sheet-label">Foto</label>
+      <div class="sheet-file-btn" id="fileBtnArea" onclick="document.getElementById('fileInput').click()">
+        <div class="sheet-file-icon">🖼️</div>
+        <div class="sheet-file-text">Ketuk untuk pilih foto dari galeri</div>
+      </div>
+      <img id="filePreview" class="sheet-file-preview" alt="preview">
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewFile(this)">
+    </div>
+    <div class="sheet-row">
+      <label class="sheet-label">Keterangan (opsional)</label>
+      <input type="text" class="sheet-input" id="captionInput" placeholder="Cerita di balik foto ini...">
+    </div>
+    <div class="sheet-row">
+      <label class="sheet-label">Kategori</label>
+      <select class="sheet-input" id="categoryInput">
+        <option value="moment">⭐ Momen</option>
+        <option value="date">🌸 Kencan</option>
+        <option value="travel">✈️ Jalan-jalan</option>
+        <option value="selfie">🤳 Selfie</option>
+      </select>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" onclick="closeEdit()">Batal</button>
+      <button class="btn-save" onclick="savePhoto()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ============ CONFIG ============
+const CORRECT_PIN = "0410"; // 🔑 GANTI PIN ANDA DI SINI
+const QR_TOKEN    = "ourlittleworld2024"; // Token QR (di URL: ?key=ourlittleworld2024)
+
+// ============ STORAGE ============
+let photos = JSON.parse(localStorage.getItem('photos') || '[]');
+let currentFilter = 'all';
+let lbIndex = 0;
+let editingIndex = null;
+
+// ============ BUBBLES ============
+(function(){
+  const wrap = document.getElementById('bubbles');
+  const colors = ['#b07fd4','#f2a7d8','#e4c9f5','#7b3fa0','#c06fd4'];
+  for(let i=0;i<18;i++){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const s = 20+Math.random()*60;
+    b.style.cssText = `
+      width:${s}px;height:${s}px;
+      left:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${8+Math.random()*12}s;
+      animation-delay:${-Math.random()*15}s;
+    `;
+    wrap.appendChild(b);
+  }
+})();
+
+// ============ AUTO QR CHECK ============
+(function(){
+  const p = new URLSearchParams(location.search);
+  if(p.get('key') === QR_TOKEN) unlock();
+})();
+
+// ============ PIN LOGIC ============
+document.querySelectorAll('.pin-digit').forEach((el, i, arr) => {
+  el.addEventListener('input', e => {
+    if(el.value) { if(arr[i+1]) arr[i+1].focus(); else checkPin(); }
+  });
+  el.addEventListener('keydown', e => {
+    if(e.key==='Backspace' && !el.value && arr[i-1]) arr[i-1].focus();
+  });
+});
+
+function checkPin(){
+  const pin = ['p1','p2','p3','p4'].map(id=>document.getElementById(id).value).join('');
+  if(pin === CORRECT_PIN) {
+    unlock();
+  } else {
+    const err = document.getElementById('errMsg');
+    err.textContent = '❌ PIN salah, coba lagi ya~';
+    err.style.animation = 'none'; void err.offsetWidth; err.style.animation = '';
+    ['p1','p2','p3','p4'].forEach(id=>{ document.getElementById(id).value=''; });
+    document.getElementById('p1').focus();
+  }
+}
+
+function unlock(){
+  const ls = document.getElementById('lockScreen');
+  ls.style.opacity = '0';
+  ls.style.transform = 'scale(1.05)';
+  ls.style.transition = 'all 0.6s ease';
+  setTimeout(()=>{ ls.style.display='none'; }, 600);
+  document.getElementById('mainContent').style.display = 'block';
+  document.body.classList.remove('locked');
+  renderGallery();
+  updateBanner();
+}
+
+// ============ GALLERY ============
+function renderGallery(){
+  const grid = document.getElementById('galleryGrid');
+  const filtered = currentFilter==='all' ? photos : photos.filter(p=>p.cat===currentFilter);
+  grid.innerHTML = '';
+
+  filtered.forEach((p, i) => {
+    const realIdx = photos.indexOf(p);
+    const card = document.createElement('div');
+    card.className = 'photo-card';
+    card.style.animationDelay = (i*0.07)+'s';
+    card.innerHTML = `
+      <div style="position:relative">
+        <img class="photo-placeholder" src="${p.src}" alt="${p.cap||''}" onclick="openLightbox(${realIdx})" loading="lazy" style="display:block;width:100%;border-radius:18px;">
+        <div class="card-overlay" onclick="openLightbox(${realIdx})">
+          <span class="card-caption">${p.cap||''}</span>
+        </div>
+        <button class="heart-badge" onclick="toggleHeart(${realIdx})" title="Suka">${p.heart?'💜':'🤍'}</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Add Photo card
+  const addCard = document.createElement('div');
+  addCard.className = 'photo-card add-photo-card';
+  addCard.innerHTML = `
+    <div class="photo-empty" onclick="openEdit(null)">
+      <span class="photo-empty-icon">➕</span>
+      <span class="photo-empty-label">Tambah<br>Foto Baru</span>
+    </div>`;
+  grid.appendChild(addCard);
+}
+
+function filterPhotos(cat, btn){
+  currentFilter = cat;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGallery();
+}
+
+function updateBanner(){
+  const now = new Date();
+  document.getElementById('bannerDate').textContent = now.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('photoCount').textContent = `📸 ${photos.length} kenangan tersimpan`;
+  const quotes = [
+    '"Setiap foto menyimpan sejuta rasa..."',
+    '"Bersama kamu, setiap hari adalah cerita indah 💜"',
+    '"Kenangan terindah adalah yang kita buat bersama ✨"',
+    '"Senyummu adalah favoritku 🌸"',
+  ];
+  document.getElementById('bannerQuote').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+}
+
+// ============ HEART ============
+function toggleHeart(idx){
+  photos[idx].heart = !photos[idx].heart;
+  savePhotos();
+  renderGallery();
+  showToast(photos[idx].heart ? '💜 Ditandai sebagai favorit!' : 'Tanda suka dihapus');
+}
+
+// ============ LIGHTBOX ============
+function openLightbox(idx){
+  lbIndex = idx;
+  updateLb();
+  document.getElementById('lightbox').classList.add('open');
+}
+function updateLb(){
+  const p = photos[lbIndex];
+  document.getElementById('lightboxImg').src = p.src;
+  document.getElementById('lightboxCaption').textContent = p.cap || '💜';
+  document.getElementById('lbPrev').style.display = lbIndex>0?'flex':'none';
+  document.getElementById('lbNext').style.display = lbIndex<photos.length-1?'flex':'none';
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+function lbNav(dir){ lbIndex += dir; if(lbIndex<0)lbIndex=0; if(lbIndex>=photos.length)lbIndex=photos.length-1; updateLb(); }
+document.getElementById('lightbox').addEventListener('click', function(e){ if(e.target===this)closeLightbox(); });
+
+// ============ EDIT MODAL ============
+function openEdit(idx){
+  editingIndex = idx;
+  document.getElementById('sheetTitle').textContent = idx===null ? '✨ Tambah Foto Baru' : '✏️ Edit Foto';
+  if(idx!==null){
+    document.getElementById('captionInput').value = photos[idx].cap||'';
+    document.getElementById('categoryInput').value = photos[idx].cat||'moment';
+    document.getElementById('filePreview').src = photos[idx].src;
+    document.getElementById('filePreview').style.display='block';
+    document.getElementById('fileBtnArea').style.display='none';
+  } else {
+    document.getElementById('captionInput').value='';
+    document.getElementById('categoryInput').value='moment';
+    document.getElementById('filePreview').style.display='none';
+    document.getElementById('fileBtnArea').style.display='block';
+  }
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEdit(){ document.getElementById('editModal').classList.remove('open'); }
+document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeEdit();});
+
+function previewFile(input){
+  if(!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('filePreview').src = e.target.result;
+    document.getElementById('filePreview').style.display='block';
+    document.getElementById('fileBtnArea').style.display='none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function savePhoto(){
+  const cap = document.getElementById('captionInput').value;
+  const cat = document.getElementById('categoryInput').value;
+  const preview = document.getElementById('filePreview');
+
+  if(editingIndex !== null){
+    photos[editingIndex].cap = cap;
+    photos[editingIndex].cat = cat;
+    if(preview.style.display!=='none' && preview.src && !preview.src.startsWith('data:') && photos[editingIndex].src!==preview.src){
+      photos[editingIndex].src = preview.src;
+    }
+  } else {
+    if(preview.style.display==='none' || !preview.src){ showToast('⚠️ Pilih foto dulu ya!'); return; }
+    photos.unshift({ src: preview.src, cap, cat, heart: false, added: Date.now() });
+  }
+
+  savePhotos();
+  renderGallery();
+  updateBanner();
+  closeEdit();
+  showToast('💜 Foto tersimpan!');
+  document.getElementById('fileInput').value='';
+}
+
+function savePhotos(){ localStorage.setItem('photos', JSON.stringify(photos)); }
+
+// ============ TOAST ============
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ============ SWIPE LIGHTBOX ============
+let tsX=null;
+document.getElementById('lightbox').addEventListener('touchstart',e=>tsX=e.touches[0].clientX);
+document.getElementById('lightbox').addEventListener('touchend',e=>{
+  if(tsX===null)return;
+  const dx = e.changedTouches[0].clientX - tsX;
+  if(Math.abs(dx)>50){ lbNav(dx<0?1:-1); }
+  tsX=null;
+});
+</script>
+
+<!-- QR CODE INFO (tidak tampil di halaman, hanya komentar) -->
+<!--
+  ╔══════════════════════════════════════════════════════╗
+  ║  CARA MEMBUAT QR CODE:                               ║
+  ║  1. Buka: https://qr.io atau https://qrcode-monkey.com ║
+  ║  2. Buat QR dengan URL ini:                          ║
+  ║     [URL_WEBSITE_KAMU]?key=ourlittleworld2024        ║
+  ║  3. Simpan & print QR nya!                           ║
+  ║                                                      ║
+  ║  GANTI PIN:                                          ║
+  ║  Cari  CORRECT_PIN = "0410"  di script               ║
+  ║  Ganti dengan 4 angka pilihanmu                      ║
+  ╚══════════════════════════════════════════════════════╝
+-->
+</body>
+</html>
